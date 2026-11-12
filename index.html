@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>90s Sony Trinitron CRT TV Simulator - ARchives</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Retro Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        vt323: ['VT323', 'monospace'],
+                        arcade: ['"Press Start 2P"', 'cursive'],
+                        mono: ['"Share Tech Mono"', 'monospace']
+                    },
+                    colors: {
+                        crtGreen: '#00ff66',
+                        crtAmber: '#ffb000',
+                        trinitronDark: '#121216',
+                        trinitronGrey: '#222228',
+                        trinitronAccent: '#6b7280'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Ambient Elegant Obsidian Room */
+        body {
+            background-color: #030305;
+            background-image: 
+                radial-gradient(circle at 50% 30%, #151520 0%, #08080c 65%, #020203 100%),
+                radial-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 0);
+            background-size: 100% 100%, 32px 32px;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Sony Trinitron Outer Bezel Chassis - Gunmetal & Metallic Satin */
+        .trinitron-chassis {
+            background: linear-gradient(180deg, #2b2b36 0%, #1a1a22 40%, #101015 100%);
+            border: 10px solid #0d0d11;
+            border-radius: 28px;
+            box-shadow: 
+                inset 0 1px 3px rgba(255, 255, 255, 0.18),
+                inset 0 -6px 14px rgba(0,0,0,0.95),
+                0 35px 90px rgba(0, 0, 0, 0.99),
+                0 0 45px rgba(0, 255, 102, 0.03);
+            position: relative;
+        }
+
+        /* Metallic Satin Top Accent Line */
+        .trinitron-stripe {
+            height: 3px;
+            background: linear-gradient(90deg, #0d0d0f, #7a7a8c 20%, #e2e2ec 50%, #7a7a8c 80%, #0d0d0f);
+            opacity: 0.9;
+        }
+
+        /* Curved CRT Tube Frame */
+        .crt-screen-wrapper {
+            position: relative;
+            background: #000;
+            border-radius: 24px / 20px;
+            overflow: hidden;
+            box-shadow: inset 0 0 80px rgba(0, 0, 0, 1);
+        }
+
+        .aspect-4-3 { aspect-ratio: 4 / 3; }
+
+        /* Authentic CRT Turn-Off Animation Effects */
+        @keyframes crtTurnOff {
+            0% {
+                transform: scale(1, 1);
+                filter: brightness(1);
+                opacity: 1;
+            }
+            35% {
+                transform: scale(1, 0.003);
+                filter: brightness(3) contrast(1.8);
+                background-color: #ffffff;
+                opacity: 1;
+            }
+            70% {
+                transform: scale(0.002, 0.003);
+                filter: brightness(8);
+                background-color: #ffffff;
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0, 0);
+                filter: brightness(0);
+                background-color: #000000;
+                opacity: 0;
+            }
+        }
+
+        .animate-crt-off {
+            animation: crtTurnOff 0.45s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        /* CRT Channel Switch Flash Effect */
+        @keyframes crtChannelFlash {
+            0% { filter: brightness(2.2) contrast(1.2); opacity: 0.9; }
+            50% { filter: brightness(0.3); opacity: 0.4; }
+            100% { filter: brightness(1); opacity: 1; }
+        }
+
+        .animate-channel-switch {
+            animation: crtChannelFlash 0.3s ease-out;
+        }
+
+        /* Realistic Softer Scanlines & Aperture Grille Overlay */
+        .scanlines-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 60%,
+                rgba(0, 0, 0, 0.22) 60%
+            );
+            background-size: 100% 3px;
+            pointer-events: none;
+            z-index: 20;
+            opacity: 0.65;
+        }
+
+        .aperture-grille-mesh {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(255,0,0,0.015), rgba(0,255,0,0.015), rgba(0,0,255,0.015));
+            background-size: 3px 100%;
+            pointer-events: none;
+            z-index: 19;
+            opacity: 0.8;
+        }
+
+        .crt-glare {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.05) 0%,
+                rgba(255, 255, 255, 0.01) 25%,
+                rgba(0, 0, 0, 0) 60%,
+                rgba(255, 255, 255, 0.02) 100%
+            );
+            pointer-events: none;
+            z-index: 22;
+            border-radius: inherit;
+        }
+
+        .crt-vignette {
+            position: absolute;
+            inset: 0;
+            box-shadow: inset 0 0 75px rgba(0,0,0,0.92);
+            pointer-events: none;
+            z-index: 21;
+        }
+
+        /* CRT Curved Empty Dark Glass Faceplate when Powered Off */
+        .crt-dark-glass {
+            background: 
+                radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 50%),
+                radial-gradient(ellipse at 50% 50%, #14171d 0%, #090b0e 60%, #020304 100%);
+            box-shadow: 
+                inset 0 0 90px rgba(0, 0, 0, 0.98),
+                inset 0 1px 3px rgba(255, 255, 255, 0.08);
+            position: absolute;
+            inset: 0;
+            z-index: 30;
+            pointer-events: none;
+        }
+
+        .osd-glow {
+            color: #00ff66;
+            text-shadow: 0 0 5px rgba(0, 255, 102, 0.85), 0 0 10px rgba(0, 255, 102, 0.35);
+        }
+
+        /* Custom Amber Thumb Range Slider (Seekbar) */
+        input[type=range].retro-seekbar {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            width: 100%;
+        }
+
+        input[type=range].retro-seekbar:focus {
+            outline: none;
+        }
+
+        input[type=range].retro-seekbar::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #23232b;
+            border-radius: 3px;
+            border: 1px solid #141418;
+        }
+
+        input[type=range].retro-seekbar::-webkit-slider-thumb {
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #ffb000;
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -5px;
+            box-shadow: 0 0 8px #ffb000, 0 0 2px #ffffff;
+            transition: transform 0.1s ease;
+        }
+
+        input[type=range].retro-seekbar::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        input[type=range].retro-seekbar::-moz-range-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #23232b;
+            border-radius: 3px;
+            border: 1px solid #141418;
+        }
+
+        input[type=range].retro-seekbar::-moz-range-thumb {
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #ffb000;
+            cursor: pointer;
+            box-shadow: 0 0 8px #ffb000, 0 0 2px #ffffff;
+        }
+
+        /* Tactile Remote & Chassis Buttons */
+        .remote-btn {
+            background: linear-gradient(145deg, #26262e, #16161a);
+            box-shadow: 0 4px 0 #0b0b0e, 0 5px 8px rgba(0,0,0,0.85);
+            transition: all 0.08s ease;
+        }
+        .remote-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #0b0b0e, 0 2px 4px rgba(0,0,0,0.85);
+        }
+
+        .remote-btn-red {
+            background: linear-gradient(145deg, #9f1239, #710e28);
+            box-shadow: 0 4px 0 #3f0717, 0 5px 8px rgba(0,0,0,0.85);
+        }
+        .remote-btn-red:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #3f0717, 0 2px 4px rgba(0,0,0,0.85);
+        }
+
+        .remote-btn-blue {
+            background: linear-gradient(145deg, #1e40af, #1e3a8a);
+            box-shadow: 0 4px 0 #172554, 0 5px 8px rgba(0,0,0,0.85);
+        }
+        .remote-btn-blue:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #172554, 0 2px 4px rgba(0,0,0,0.85);
+        }
+
+        .tv-tac-btn {
+            background: linear-gradient(180deg, #2a2a33, #15151a);
+            border: 1px solid #373742;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 4px rgba(0,0,0,0.9);
+        }
+        .tv-tac-btn:active {
+            background: #101014;
+            transform: translateY(1px);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #08080a; }
+        ::-webkit-scrollbar-thumb { background: #1e1e26; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00ff66; }
+    </style>
+</head>
+<body class="text-gray-200 min-h-screen flex flex-col justify-between font-mono selection:bg-crtGreen selection:text-black antialiased">
+
+    <!-- Room Container -->
+    <main class="flex-1 flex flex-col xl:flex-row items-center justify-center p-3 sm:p-6 lg:p-8 gap-8 max-w-7xl mx-auto w-full">
+        
+        <!-- CRT TV Cabinet -->
+        <div class="w-full xl:flex-1 max-w-4xl flex flex-col">
+            
+            <!-- Trinitron Bezel Chassis -->
+            <div class="trinitron-chassis p-4 sm:p-6 relative">
+                
+                <div class="trinitron-stripe mb-3 rounded-full"></div>
+
+                <!-- Top Logo Badge & Indicators - Strictly AR-CHIVES on single line -->
+                <div class="flex justify-between items-center mb-2 px-2 sm:px-3 text-[8px] sm:text-[9px] font-mono tracking-widest uppercase whitespace-nowrap overflow-hidden">
+                    <div class="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+                        <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-neutral-900 inline-block transition-colors duration-300" id="powerLed"></span>
+                        <span class="text-neutral-400 font-arcade text-[6px] sm:text-[7px] tracking-[0.25em] uppercase font-bold opacity-90 whitespace-nowrap inline-block">AR-CHIVES</span>
+                        <span class="text-neutral-600 tracking-widest uppercase hidden md:inline ml-1">Trinitron CRT</span>
+                    </div>
+                    <div class="text-neutral-400 tracking-wider uppercase flex items-center space-x-1.5 sm:space-x-3 shrink-0">
+                        <span class="text-[7px] sm:text-[9px]">APERTURE GRILLE</span>
+                        <span class="text-neutral-700">|</span>
+                        <span class="text-[7px] sm:text-[9px]">STEREO SOUND</span>
+                    </div>
+                </div>
+
+                <!-- CRT Screen Area -->
+                <div class="crt-screen-wrapper aspect-4-3 w-full relative" id="crtDisplay">
+                    
+                    <video id="tvPlayer" class="w-full h-full object-fill bg-black hidden" playsinline></video>
+                    
+                    <canvas id="staticCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-10 hidden"></canvas>
+
+                    <div class="scanlines-overlay"></div>
+                    <div class="aperture-grille-mesh"></div>
+                    <div class="crt-vignette"></div>
+                    <div class="crt-glare"></div>
+
+                    <!-- On-Screen Display (OSD) -->
+                    <div id="osd" class="absolute top-4 right-5 sm:top-6 sm:right-7 z-30 font-vt323 text-right pointer-events-none opacity-0 transition-opacity duration-300 max-w-[65%]">
+                        <div class="text-2xl sm:text-4xl font-bold osd-glow leading-none" id="osdChannel">CH 01</div>
+                        <div class="text-sm sm:text-lg osd-glow mt-0.5" id="osdInput">FILL MODE</div>
+                        <!-- Strictly formatted as "Now playing: [Filename]" with compact bounds -->
+                        <div class="text-[10px] sm:text-xs text-white font-mono mt-1 leading-snug break-words max-w-[170px] sm:max-w-[220px] drop-shadow-md text-right bg-black/50 p-1 rounded border border-crtGreen/30" id="osdTitle">Now playing: LOADING...</div>
+                    </div>
+
+                    <!-- Volume OSD -->
+                    <div id="osdVolume" class="absolute bottom-5 left-5 sm:bottom-6 sm:left-7 z-30 font-vt323 pointer-events-none opacity-0 transition-opacity duration-300">
+                        <div class="text-xl sm:text-2xl osd-glow flex items-center space-x-2">
+                            <span>VOLUME</span>
+                            <div class="w-28 sm:w-36 h-4 sm:h-5 bg-black/80 border border-crtGreen/60 p-0.5 flex space-x-1 rounded" id="volBars"></div>
+                        </div>
+                    </div>
+
+                    <!-- Power On Initial Overlay Prompt -->
+                    <div id="unmutePrompt" class="absolute inset-0 bg-black/85 z-40 flex flex-col items-center justify-center p-6 text-center cursor-pointer backdrop-blur-[1px]">
+                        <div class="w-14 h-14 rounded-full bg-crtGreen/10 border-2 border-crtGreen flex items-center justify-center text-crtGreen text-xl mb-3 animate-bounce shadow-[0_0_20px_rgba(0,255,102,0.3)]">
+                            <i class="fa-solid fa-power-off"></i>
+                        </div>
+                        <p class="font-vt323 text-xs sm:text-sm font-bold text-crtGreen tracking-widest uppercase">CLICK POWER TO TURN ON TV</p>
+                    </div>
+
+                    <!-- Powered Off Curved Glass Texture Overlay -->
+                    <div id="powerOffScreen" class="crt-dark-glass flex items-center justify-center">
+                        <div class="w-full h-full bg-radial from-transparent via-transparent to-black/90 pointer-events-none"></div>
+                    </div>
+
+                </div>
+
+                <!-- TV BEZEL PLAYBACK CONTROL BAR & SEEKBAR -->
+                <div class="mt-4 p-3 bg-neutral-950/90 border border-neutral-800/80 rounded-xl shadow-inner flex flex-col justify-center gap-2">
+                    <div class="flex items-center space-x-3 w-full">
+                        <button id="bezPlayBtn" class="tv-tac-btn w-9 h-9 rounded-lg flex items-center justify-center text-amber-400 shrink-0">
+                            <i id="bezPlayIcon" class="fa-solid fa-pause text-xs"></i>
+                        </button>
+                        
+                        <span id="currentTimeText" class="font-mono text-xs text-amber-400/90 tracking-wider shrink-0 font-bold min-w-[42px]">00:00</span>
+                        
+                        <input id="seekBar" type="range" min="0" max="100" value="0" step="0.1" class="retro-seekbar flex-1">
+                        
+                        <span id="durationText" class="font-mono text-xs text-neutral-400 tracking-wider shrink-0 min-w-[42px] text-right">00:00</span>
+                    </div>
+                </div>
+
+                <!-- Lower Chassis Controls Row -->
+                <div class="mt-3 pt-2 border-t border-neutral-900 flex items-center justify-between px-2">
+                    <div class="flex items-center">
+                        <button id="cabPowerBtn" class="w-10 h-10 rounded-full bg-gradient-to-b from-red-600 to-red-800 border border-red-500 text-white flex items-center justify-center text-xs shadow-md active:scale-95 transition" title="Power Switch">
+                            <i class="fa-solid fa-power-off"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <button id="cabScanlinesBtn" class="tv-tac-btn px-3 py-1.5 rounded text-amber-400 font-mono text-[10px] font-bold tracking-wider">
+                            SCANLINES
+                        </button>
+                        <div class="flex space-x-1">
+                            <button id="cabChDown" class="tv-tac-btn px-3 py-1.5 rounded text-neutral-300 text-xs">
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </button>
+                            <button id="cabChUp" class="tv-tac-btn px-3 py-1.5 rounded text-neutral-300 text-xs">
+                                <i class="fa-solid fa-chevron-up"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Handheld Remote Control Panel (RM-V980 COMMANDER) -->
+        <div class="w-full sm:w-72 bg-neutral-950 border-4 border-neutral-900 rounded-[36px] p-5 shadow-2xl flex flex-col justify-between items-center space-y-3.5 border-b-8">
+            
+            <!-- Explicit Remote Branding Header -->
+            <div class="w-full text-center border-b border-neutral-800/80 pb-3 pt-1">
+                <div class="flex items-center justify-center space-x-1 mb-1">
+                    <span class="text-zinc-200 font-mono tracking-widest text-xs uppercase font-bold drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">AR-CHIVES</span>
+                    <span class="text-[9px] font-sans text-neutral-400 font-medium tracking-widest lowercase italic ml-0.5">by</span>
+                    <span class="text-neutral-200 font-sans tracking-[0.15em] text-xs font-semibold uppercase ml-1">SenthilKumar</span>
+                </div>
+                <div class="flex items-center justify-center space-x-2">
+                    <span class="h-[1px] w-5 bg-gradient-to-r from-transparent to-neutral-700"></span>
+                    <span class="text-[8px] text-amber-500/90 font-mono tracking-[0.3em] font-bold uppercase">RM-V980 COMMANDER</span>
+                    <span class="h-[1px] w-5 bg-gradient-to-l from-transparent to-neutral-700"></span>
+                </div>
+            </div>
+
+            <!-- Dedicated Shuffle Button right below header -->
+            <div class="w-full">
+                <button id="remShuffle" class="remote-btn w-full py-2.5 rounded-xl text-xs font-bold text-emerald-400 flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-shuffle text-xs"></i>
+                    <span>SHUFFLE CHANNEL</span>
+                </button>
+            </div>
+
+            <!-- Row 1: Power & Mute -->
+            <div class="w-full grid grid-cols-2 gap-3">
+                <button id="remPower" class="remote-btn remote-btn-red p-3 rounded-2xl flex flex-col items-center justify-center text-white">
+                    <i class="fa-solid fa-power-off text-base"></i>
+                    <span class="text-[9px] font-bold mt-1 uppercase">POWER</span>
+                </button>
+                <button id="remMute" class="remote-btn p-3 rounded-2xl flex flex-col items-center justify-center text-neutral-300">
+                    <i id="remMuteIcon" class="fa-solid fa-volume-high text-base"></i>
+                    <span class="text-[9px] font-bold mt-1 uppercase">MUTE</span>
+                </button>
+            </div>
+
+            <!-- Row 2: -30s and +30s Skip Buttons -->
+            <div class="w-full grid grid-cols-2 gap-3">
+                <button id="remSkipBack" class="remote-btn p-2.5 rounded-xl flex items-center justify-center space-x-2 text-amber-400">
+                    <i class="fa-solid fa-rotate-left text-xs"></i>
+                    <span class="text-xs font-bold font-mono">-30s</span>
+                </button>
+                <button id="remSkipFwd" class="remote-btn p-2.5 rounded-xl flex items-center justify-center space-x-2 text-amber-400">
+                    <span class="text-xs font-bold font-mono">+30s</span>
+                    <i class="fa-solid fa-rotate-right text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Row 3: Volume & Channel Controls Grid -->
+            <div class="w-full grid grid-cols-2 gap-3.5 bg-neutral-900/60 p-3 rounded-2xl border border-neutral-900">
+                <!-- Volume -->
+                <div class="flex flex-col items-center space-y-1.5">
+                    <span class="text-[9px] text-neutral-400 font-bold tracking-wider">VOL</span>
+                    <button id="remVolUp" class="remote-btn w-full py-2 rounded-xl flex items-center justify-center text-neutral-200">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                    </button>
+                    <button id="remVolDown" class="remote-btn w-full py-2 rounded-xl flex items-center justify-center text-neutral-200">
+                        <i class="fa-solid fa-minus text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- Channel -->
+                <div class="flex flex-col items-center space-y-1.5">
+                    <span class="text-[9px] text-neutral-400 font-bold tracking-wider">CH</span>
+                    <button id="remChUp" class="remote-btn w-full py-2 rounded-xl flex items-center justify-center text-emerald-400">
+                        <i class="fa-solid fa-chevron-up text-xs"></i>
+                    </button>
+                    <button id="remChDown" class="remote-btn w-full py-2 rounded-xl flex items-center justify-center text-emerald-400">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Row 4: Dedicated Aspect Ratio Button -->
+            <div class="w-full">
+                <button id="remAspect" class="remote-btn w-full py-2.5 rounded-xl text-xs font-bold text-cyan-400 flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-expand text-xs"></i>
+                    <span>ASPECT RATIO</span>
+                </button>
+            </div>
+
+            <!-- Row 5: Utility Buttons (Scanlines & TV Guide) -->
+            <div class="w-full space-y-2">
+                <button id="remScanlines" class="remote-btn w-full py-2 rounded-xl text-[9px] font-bold text-amber-400 flex items-center justify-center space-x-1">
+                    <i class="fa-solid fa-grip-lines text-xs"></i>
+                    <span>SCANLINES TOGGLE</span>
+                </button>
+
+                <button id="remEpg" class="remote-btn remote-btn-blue w-full py-2.5 rounded-xl text-xs font-bold text-white flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-list"></i>
+                    <span>TV GUIDE (EPG)</span>
+                </button>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- TV Guide EPG Modal -->
+    <div id="epgModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="bg-neutral-950 border-2 border-crtGreen/50 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+            <div class="bg-neutral-900 px-6 py-4 border-b border-neutral-800 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <i class="fa-solid fa-tv text-crtGreen text-xl"></i>
+                    <div>
+                        <h3 class="font-vt323 text-2xl text-crtGreen tracking-widest leading-none">AR-CHIVES TV GUIDE</h3>
+                        <p class="text-xs text-neutral-400">Select any channel to tune in immediately</p>
+                    </div>
+                </div>
+                <button id="closeEpgBtn" class="text-neutral-400 hover:text-white text-2xl p-1"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="p-4 flex-1 overflow-y-auto space-y-2" id="epgList"></div>
+        </div>
+    </div>
+
+    <script>
+        const _a1 = 'aHR0cHM6Ly9hcmNoaXZlLm9yZy9tZXRhZGF0YS9BUlJNb3ZpZXM=';
+        const _a2 = 'aHR0cHM6Ly9hcmNoaXZlLm9yZy9kb3dubG9hZC9BUlJNb3ZpZXMv';
+
+        const METADATA_ENDPOINT = atob(_a1);
+        const STREAM_BASE_URL = atob(_a2);
+
+        let channels = [];
+        let currentChannelIndex = 0;
+        let isPowerOn = false;
+        let isMuted = false;
+        let isSeeking = false;
+        let currentVolume = 0.8;
+        let scanlinesEnabled = true;
+
+        const aspectModes = [
+            { label: 'FILL (STRETCH)', class: 'object-fill' },
+            { label: '4:3 PILLARBOX', class: 'object-contain' },
+            { label: 'ZOOM (CROP)', class: 'object-cover' }
+        ];
+        let currentAspectIndex = 0;
+
+        const tvPlayer = document.getElementById('tvPlayer');
+        const crtDisplay = document.getElementById('crtDisplay');
+        const staticCanvas = document.getElementById('staticCanvas');
+        const powerOffScreen = document.getElementById('powerOffScreen');
+        const powerLed = document.getElementById('powerLed');
+        const unmutePrompt = document.getElementById('unmutePrompt');
+        
+        const seekBar = document.getElementById('seekBar');
+        const currentTimeText = document.getElementById('currentTimeText');
+        const durationText = document.getElementById('durationText');
+        const bezPlayBtn = document.getElementById('bezPlayBtn');
+        const bezPlayIcon = document.getElementById('bezPlayIcon');
+
+        const osd = document.getElementById('osd');
+        const osdChannel = document.getElementById('osdChannel');
+        const osdInput = document.getElementById('osdInput');
+        const osdTitle = document.getElementById('osdTitle');
+        const osdVolume = document.getElementById('osdVolume');
+        const volBars = document.getElementById('volBars');
+        const scanlinesOverlay = document.querySelector('.scanlines-overlay');
+
+        let osdTimeout, osdVolTimeout, staticAnimId;
+
+        const FALLBACK_MOVIES = [
+            { name: "Big Buck Bunny", streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", duration: 596 },
+            { name: "Elephants Dream", streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4", duration: 653 },
+            { name: "Sintel Sci-Fi Reel", streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4", duration: 888 }
+        ];
+
+        function formatTime(seconds) {
+            if (isNaN(seconds) || seconds < 0) return "00:00";
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        async function loadCatalog() {
+            try {
+                const res = await fetch(METADATA_ENDPOINT);
+                const data = await res.json();
+                if (data && data.files) {
+                    const videoFiles = data.files.filter(f => f.name.endsWith('.mp4') || f.name.endsWith('.webm'));
+                    if (videoFiles.length > 0) {
+                        channels = videoFiles.map((file, idx) => ({
+                            ch: idx + 1,
+                            title: file.title || file.name.replace(/\.[^/.]+$/, "").replace(/_/g, " "),
+                            streamUrl: STREAM_BASE_URL + encodeURIComponent(file.name),
+                            duration: file.length ? parseFloat(file.length) : 3600
+                        }));
+                    }
+                }
+            } catch (e) {
+                console.warn('Using fallback movie catalog:', e);
+            }
+
+            if (channels.length === 0) {
+                channels = FALLBACK_MOVIES.map((item, idx) => ({
+                    ch: idx + 1,
+                    title: item.name,
+                    streamUrl: item.streamUrl,
+                    duration: item.duration
+                }));
+            }
+            renderEPG();
+        }
+
+        function triggerStatic(durationMs = 350) {
+            staticCanvas.classList.remove('hidden');
+            crtDisplay.classList.add('animate-channel-switch');
+            setTimeout(() => crtDisplay.classList.remove('animate-channel-switch'), 300);
+
+            const ctx = staticCanvas.getContext('2d');
+            
+            function drawNoise() {
+                if (staticCanvas.classList.contains('hidden')) return;
+                const w = staticCanvas.width = staticCanvas.clientWidth / 2;
+                const h = staticCanvas.height = staticCanvas.clientHeight / 2;
+                const imgData = ctx.createImageData(w, h);
+                const buffer = new Uint32Array(imgData.data.buffer);
+                for (let i = 0; i < buffer.length; i++) {
+                    const gray = Math.floor(Math.random() * 255);
+                    buffer[i] = (255 << 24) | (gray << 16) | (gray << 8) | gray;
+                }
+                ctx.putImageData(imgData, 0, 0);
+                staticAnimId = requestAnimationFrame(drawNoise);
+            }
+
+            cancelAnimationFrame(staticAnimId);
+            drawNoise();
+            setTimeout(() => {
+                staticCanvas.classList.add('hidden');
+                cancelAnimationFrame(staticAnimId);
+            }, durationMs);
+        }
+
+        function switchChannel(index, isRandom = false) {
+            if (!isPowerOn || channels.length === 0) return;
+            if (isRandom) {
+                index = Math.floor(Math.random() * channels.length);
+            } else {
+                if (index < 0) index = channels.length - 1;
+                if (index >= channels.length) index = 0;
+            }
+
+            currentChannelIndex = index;
+            const ch = channels[currentChannelIndex];
+            
+            osdChannel.textContent = `CH ${ch.ch < 10 ? '0' + ch.ch : ch.ch}`;
+            osdInput.textContent = aspectModes[currentAspectIndex].label;
+            
+            // Format strictly as "Now playing: [Filename]"
+            osdTitle.textContent = `Now playing: ${ch.title}`;
+            
+            osd.classList.remove('opacity-0');
+            clearTimeout(osdTimeout);
+            osdTimeout = setTimeout(() => osd.classList.add('opacity-0'), 3000);
+
+            triggerStatic(380);
+
+            tvPlayer.src = ch.streamUrl;
+            tvPlayer.load();
+
+            tvPlayer.onloadedmetadata = () => {
+                const dur = tvPlayer.duration || ch.duration;
+                durationText.textContent = formatTime(dur);
+                seekBar.max = dur;
+                
+                const jumpTime = dur * (0.15 + Math.random() * 0.7);
+                tvPlayer.currentTime = jumpTime;
+                
+                tvPlayer.muted = isMuted;
+                tvPlayer.volume = currentVolume;
+                tvPlayer.play().catch(() => {
+                    tvPlayer.muted = true;
+                    tvPlayer.play();
+                });
+            };
+        }
+
+        function togglePower() {
+            isPowerOn = !isPowerOn;
+            if (isPowerOn) {
+                crtDisplay.classList.remove('animate-crt-off');
+                tvPlayer.classList.remove('hidden');
+                unmutePrompt.classList.add('hidden');
+                powerOffScreen.classList.add('hidden');
+                powerLed.className = "w-2.5 h-2.5 rounded-full bg-red-600 inline-block shadow-[0_0_12px_rgba(220,38,38,0.95)] animate-pulse";
+                // Tune into the remembered channel index
+                switchChannel(currentChannelIndex);
+            } else {
+                // IMMEDIATELY halt and clear media to ensure zero audio output
+                tvPlayer.pause();
+                tvPlayer.muted = true;
+                tvPlayer.volume = 0;
+                tvPlayer.removeAttribute('src');
+                tvPlayer.load();
+
+                crtDisplay.classList.add('animate-crt-off');
+                powerLed.className = "w-2.5 h-2.5 rounded-full bg-neutral-900 inline-block";
+                staticCanvas.classList.add('hidden');
+                
+                setTimeout(() => {
+                    tvPlayer.classList.add('hidden');
+                    powerOffScreen.classList.remove('hidden');
+                }, 400);
+            }
+        }
+
+        function togglePlayPause() {
+            if (!isPowerOn) return;
+            if (tvPlayer.paused) {
+                tvPlayer.play();
+                bezPlayIcon.className = "fa-solid fa-pause text-xs";
+            } else {
+                tvPlayer.pause();
+                bezPlayIcon.className = "fa-solid fa-play text-xs";
+            }
+        }
+
+        function skipTime(seconds) {
+            if (!isPowerOn || !tvPlayer.duration) return;
+            tvPlayer.currentTime = Math.min(tvPlayer.duration, Math.max(0, tvPlayer.currentTime + seconds));
+        }
+
+        function setVolume(delta) {
+            if (!isPowerOn) return;
+            currentVolume = Math.min(1, Math.max(0, currentVolume + delta));
+            tvPlayer.volume = currentVolume;
+            if (currentVolume > 0 && isMuted) {
+                isMuted = false;
+                tvPlayer.muted = false;
+            }
+            showVolumeOSD();
+        }
+
+        function toggleMute() {
+            if (!isPowerOn) return;
+            isMuted = !isMuted;
+            tvPlayer.muted = isMuted;
+            document.getElementById('remMuteIcon').className = isMuted 
+                ? "fa-solid fa-volume-xmark text-red-500 text-base" 
+                : "fa-solid fa-volume-high text-base";
+            showVolumeOSD();
+        }
+
+        function showVolumeOSD() {
+            volBars.innerHTML = '';
+            const activeBars = isMuted ? 0 : Math.round(currentVolume * 10);
+            for (let i = 0; i < 10; i++) {
+                const bar = document.createElement('div');
+                bar.className = `flex-1 h-full rounded-sm ${i < activeBars ? 'bg-crtGreen' : 'bg-neutral-800'}`;
+                volBars.appendChild(bar);
+            }
+            osdVolume.classList.remove('opacity-0');
+            clearTimeout(osdVolTimeout);
+            osdVolTimeout = setTimeout(() => osdVolume.classList.add('opacity-0'), 2000);
+        }
+
+        function cycleAspectRatio() {
+            if (!isPowerOn) return;
+            currentAspectIndex = (currentAspectIndex + 1) % aspectModes.length;
+            const mode = aspectModes[currentAspectIndex];
+            
+            tvPlayer.classList.remove('object-fill', 'object-contain', 'object-cover');
+            tvPlayer.classList.add(mode.class);
+
+            osdInput.textContent = mode.label;
+            osd.classList.remove('opacity-0');
+            clearTimeout(osdTimeout);
+            osdTimeout = setTimeout(() => osd.classList.add('opacity-0'), 2500);
+        }
+
+        function toggleScanlines() {
+            if (!isPowerOn) return;
+            scanlinesEnabled = !scanlinesEnabled;
+            scanlinesOverlay.style.display = scanlinesEnabled ? 'block' : 'none';
+        }
+
+        function renderEPG() {
+            const epgList = document.getElementById('epgList');
+            epgList.innerHTML = '';
+            channels.forEach((ch, idx) => {
+                const item = document.createElement('div');
+                item.className = "p-3 rounded-xl bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 flex items-center justify-between cursor-pointer";
+                item.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <span class="font-vt323 text-xl px-2 py-0.5 rounded bg-neutral-800 text-crtGreen border border-crtGreen/30">CH ${ch.ch < 10 ? '0' + ch.ch : ch.ch}</span>
+                        <span class="font-bold text-sm text-neutral-200">${ch.title}</span>
+                    </div>
+                    <span class="text-xs text-neutral-500 font-mono">TUNE IN</span>
+                `;
+                item.addEventListener('click', () => {
+                    if (!isPowerOn) togglePower();
+                    else switchChannel(idx);
+                    document.getElementById('epgModal').classList.add('hidden');
+                });
+                epgList.appendChild(item);
+            });
+        }
+
+        function setupListeners() {
+            document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+            unmutePrompt.addEventListener('click', () => { if (!isPowerOn) togglePower(); });
+            document.getElementById('cabPowerBtn').addEventListener('click', togglePower);
+            document.getElementById('remPower').addEventListener('click', togglePower);
+            
+            bezPlayBtn.addEventListener('click', togglePlayPause);
+
+            seekBar.addEventListener('input', () => {
+                isSeeking = true;
+                currentTimeText.textContent = formatTime(seekBar.value);
+            });
+
+            seekBar.addEventListener('change', () => {
+                if (tvPlayer.duration) {
+                    tvPlayer.currentTime = seekBar.value;
+                }
+                isSeeking = false;
+            });
+
+            tvPlayer.addEventListener('timeupdate', () => {
+                if (!isSeeking && tvPlayer.duration) {
+                    seekBar.value = tvPlayer.currentTime;
+                    currentTimeText.textContent = formatTime(tvPlayer.currentTime);
+                    durationText.textContent = formatTime(tvPlayer.duration);
+                }
+            });
+
+            tvPlayer.addEventListener('play', () => { bezPlayIcon.className = "fa-solid fa-pause text-xs"; });
+            tvPlayer.addEventListener('pause', () => { bezPlayIcon.className = "fa-solid fa-play text-xs"; });
+
+            document.getElementById('remSkipBack').addEventListener('click', () => skipTime(-30));
+            document.getElementById('remSkipFwd').addEventListener('click', () => skipTime(30));
+
+            // Shuffle Button Handler
+            document.getElementById('remShuffle').addEventListener('click', () => switchChannel(0, true));
+
+            document.getElementById('cabChUp').addEventListener('click', () => switchChannel(currentChannelIndex + 1));
+            document.getElementById('cabChDown').addEventListener('click', () => switchChannel(currentChannelIndex - 1));
+            document.getElementById('remChUp').addEventListener('click', () => switchChannel(currentChannelIndex + 1));
+            document.getElementById('remChDown').addEventListener('click', () => switchChannel(currentChannelIndex - 1));
+
+            document.getElementById('remVolUp').addEventListener('click', () => setVolume(0.1));
+            document.getElementById('remVolDown').addEventListener('click', () => setVolume(-0.1));
+            document.getElementById('remMute').addEventListener('click', toggleMute);
+
+            document.getElementById('remAspect').addEventListener('click', cycleAspectRatio);
+
+            document.getElementById('cabScanlinesBtn').addEventListener('click', toggleScanlines);
+            document.getElementById('remScanlines').addEventListener('click', toggleScanlines);
+
+            const epgModal = document.getElementById('epgModal');
+            document.getElementById('remEpg').addEventListener('click', () => epgModal.classList.remove('hidden'));
+            document.getElementById('closeEpgBtn').addEventListener('click', () => epgModal.classList.add('hidden'));
+        }
+
+        window.onload = () => {
+            setupListeners();
+            loadCatalog();
+        };
+    </script>
+</body>
+</html>
